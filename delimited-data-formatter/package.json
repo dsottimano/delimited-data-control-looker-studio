@@ -1,0 +1,27 @@
+{
+  "dsccViz": {
+    "gcsDevBucket": "gs://looker-viz-csv/test",
+    "gcsProdBucket": "gs://looker-viz-csv/prod",
+    "jsFile": "index.js",
+    "jsonFile": "index.json",
+    "cssFile": "index.css",
+    "print": "printMessage.js"
+  },
+  "scripts": {
+    "update_message": "dscc-scripts viz update_message -f object",
+    "build:dev": "node build-wrapper.js -d dev && NODE_OPTIONS=--openssl-legacy-provider npx webpack --config webpack.config.js --mode development",
+    "build:prod": "node build-wrapper.js -d prod && NODE_OPTIONS=--openssl-legacy-provider npx webpack --config webpack.config.js --mode production",
+    "start": "node start-wrapper.js",
+    "push:dev": "node push-wrapper.js -d dev",
+    "push:prod": "node push-wrapper.js -d prod",
+    "deploy:dev": "npm run build:dev && npm run push:dev"
+  },
+  "devDependencies": {
+    "@google/dscc-scripts": "^1.0.17",
+    "copy-webpack-plugin": "^4.6.0",
+    "cross-env": "^7.0.3"
+  },
+  "dependencies": {
+    "@google/dscc": "^0.3.22"
+  }
+}

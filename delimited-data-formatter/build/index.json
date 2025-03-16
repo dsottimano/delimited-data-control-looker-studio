@@ -1,0 +1,267 @@
+{
+  "data": [
+    {
+      "id": "concepts",
+      "label": "Dimension",
+      "elements": [
+        {
+          "id": "dimID",
+          "label": "Filter Dimension",
+          "type": "DIMENSION",
+          "options": {
+            "min": 1,
+            "max": 1
+          }
+        },
+        {
+          "id": "metricID",
+          "label": "Filter Metric",
+          "type": "METRIC",
+          "options": {
+            "min": 1,
+            "max": 1
+          }
+        }
+      ]
+    }
+  ],
+  "style": [
+    {
+      "id": "delimiterOptions",
+      "label": "Delimiter Options",
+      "elements": [
+        {
+          "id": "delimiterType",
+          "label": "Delimiter Type",
+          "type": "SELECT_SINGLE",
+          "options": [
+            {
+              "label": "Comma (,)",
+              "value": ","
+            },
+            {
+              "label": "Semicolon (;)",
+              "value": ";"
+            },
+            {
+              "label": "Pipe (|)",
+              "value": "|"
+            },
+            {
+              "label": "Dash (-)",
+              "value": "-"
+            }
+          ],
+          "defaultValue": ","
+        },
+        {
+          "id": "customDelimiter",
+          "label": "Custom Delimiter (if needed)",
+          "type": "TEXTINPUT",
+          "defaultValue": ""
+        },
+        {
+          "id": "useCompactNumbers",
+          "label": "Use Compact Number Format (10k, 5M)",
+          "type": "CHECKBOX"
+        }
+      ]
+    },
+    {
+      "id": "headerOptions",
+      "label": "Header Options",
+      "elements": [
+        {
+          "id": "showSelectedCount",
+          "label": "Show Selected Count",
+          "type": "CHECKBOX"
+        },
+        {
+          "id": "showResetLink",
+          "label": "Show Reset Link",
+          "type": "CHECKBOX"
+        },
+        {
+          "id": "resetLinkText",
+          "label": "Reset Link Text",
+          "type": "TEXTINPUT",
+          "defaultValue": "Reset"
+        }
+      ]
+    },
+    {
+      "id": "generalAppearance",
+      "label": "General Appearance",
+      "elements": [
+        {
+          "id": "fontFamily",
+          "label": "Font Family",
+          "type": "FONT_FAMILY",
+          "defaultValue": "Roboto"
+        },
+        {
+          "id": "fontSize",
+          "label": "Font Size",
+          "type": "FONT_SIZE"
+        },
+        {
+          "id": "backgroundColor",
+          "label": "Background Color",
+          "type": "FILL_COLOR",
+          "defaultValue": {
+            "color": "#ffffff"
+          }
+        }
+      ]
+    },
+    {
+      "id": "headerSection",
+      "label": "Header Section",
+      "elements": [
+        {
+          "id": "headerBackgroundColor",
+          "label": "Background Color",
+          "type": "FILL_COLOR",
+          "defaultValue": {
+            "color": "#f8f9fa"
+          }
+        },
+        {
+          "id": "headerTextColor",
+          "label": "Text Color",
+          "type": "FONT_COLOR",
+          "defaultValue": {
+            "color": "#202124"
+          }
+        },
+        {
+          "id": "headerFontWeight",
+          "label": "Font Weight",
+          "type": "FONT_SIZE",
+          "defaultValue": "500"
+        },
+        {
+          "id": "headerBorderColor",
+          "label": "Border Color",
+          "type": "BORDER_COLOR",
+          "defaultValue": {
+            "color": "#dadce0"
+          }
+        }
+      ]
+    },
+    {
+      "id": "searchSection",
+      "label": "Search Section",
+      "elements": [
+        {
+          "id": "searchBackgroundColor",
+          "label": "Background Color",
+          "type": "FILL_COLOR",
+          "defaultValue": {
+            "color": "#ffffff"
+          }
+        },
+        {
+          "id": "searchTextColor",
+          "label": "Text Color",
+          "type": "FONT_COLOR",
+          "defaultValue": {
+            "color": "#202124"
+          }
+        },
+        {
+          "id": "searchPlaceholderText",
+          "label": "Placeholder Text",
+          "type": "TEXTINPUT",
+          "defaultValue": "Type to search"
+        },
+        {
+          "id": "searchBorderColor",
+          "label": "Border Color",
+          "type": "BORDER_COLOR",
+          "defaultValue": {
+            "color": "#dadce0"
+          }
+        }
+      ]
+    },
+    {
+      "id": "listItems",
+      "label": "List Items",
+      "elements": [
+        {
+          "id": "itemBackgroundColor",
+          "label": "Background Color",
+          "type": "FILL_COLOR",
+          "defaultValue": {
+            "color": "#ffffff"
+          }
+        },
+        {
+          "id": "itemHoverColor",
+          "label": "Hover Color",
+          "type": "FILL_COLOR",
+          "defaultValue": {
+            "color": "#f1f3f4"
+          }
+        },
+        {
+          "id": "itemTextColor",
+          "label": "Text Color",
+          "type": "FONT_COLOR",
+          "defaultValue": {
+            "color": "#202124"
+          }
+        },
+        {
+          "id": "itemBorderColor",
+          "label": "Border Color",
+          "type": "BORDER_COLOR",
+          "defaultValue": {
+            "color": "#dadce0"
+          }
+        }
+      ]
+    },
+    {
+      "id": "accentElements",
+      "label": "Accent Elements",
+      "elements": [
+        {
+          "id": "accentColor",
+          "label": "Accent Color",
+          "type": "FILL_COLOR"
+        },
+        {
+          "id": "onlyButtonText",
+          "label": "'Only' Button Text",
+          "type": "TEXTINPUT",
+          "defaultValue": "only"
+        },
+        {
+          "id": "onlyButtonFontSize",
+          "label": "'Only' Button Font Size",
+          "type": "FONT_SIZE",
+          "defaultValue": "12"
+        },
+        {
+          "id": "checkboxColor",
+          "label": "Checkbox Color",
+          "type": "FILL_COLOR",
+          "defaultValue": {
+            "color": "#1a73e8"
+          }
+        }
+      ]
+    }
+  ],
+  "interactions": [
+    {
+      "id": "onClick",
+      "supportedActions": ["FILTER"]
+    }
+  ]
+}
+
+

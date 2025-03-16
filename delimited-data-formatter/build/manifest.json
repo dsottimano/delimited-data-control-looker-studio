@@ -1,0 +1,25 @@
+{
+  "name": "DD Data Formatter",
+  "organization": "David Sottimano Search Consulting",
+  "description": "A filter control that properly handles delimited values in Looker Studio",
+  "logoUrl": "https://looker.com/assets/img/images/logos/looker_black.svg",
+  "organizationUrl": "https://looker.com",
+  "supportUrl": "https://github.com/looker-open-source/custom_visualizations_v2/issues",
+  "packageUrl": "https://github.com/looker-open-source/custom_visualizations_v2/issues",
+  "privacyPolicyUrl": "https://looker.com/privacy",
+  "termsOfServiceUrl": "https://looker.com/terms",
+  "devMode": true,
+  "components": [
+    {
+      "id": "delimited-filter",
+      "name": "DD Data Filter",
+      "description": "NEW VERSION??? A filter control that properly handles delimited values, showing accurate counts for individual values within delimited strings.",
+      "iconUrl": "https://looker.com/assets/img/images/logos/looker_black.svg",
+      "resource": {
+        "js": "gs://looker-viz-csv/test/index.js",
+        "config": "gs://looker-viz-csv/test/index.json",
+        "css": "gs://looker-viz-csv/test/index.css"
+      }
+    }
+  ]
+}
