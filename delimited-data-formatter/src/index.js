@@ -149,9 +149,9 @@ function drawViz(data) {
     // Convert to sorted array for display - only show individual values, not delimited ones
     const sortedDimensionValues = Array.from(uniqueIndividualValues).sort();
   
-    // Add items to the list
-    let selectedItems = new Set(sortedDimensionValues); // Start with all selected
-    let initiallyAllSelected = true; // Track if we start with all selected
+    // Add items to the list - start with none selected
+    let selectedItems = new Set(); // Start with none selected
+    let initiallyAllSelected = false; // Track if we start with all selected
     
     // Check if there's an active filter from Looker Studio
     if (data.interactions && data.interactions.onClick && 
@@ -344,26 +344,6 @@ function drawViz(data) {
     headerSection.style.backgroundColor = styles.headerBackgroundColor;
     headerSection.style.boxSizing = 'border-box';
     
-    // Create the "Select all" checkbox
-    const selectAllCheckbox = document.createElement('input');
-    selectAllCheckbox.type = 'checkbox';
-    selectAllCheckbox.id = 'selectAllCheckbox';
-    selectAllCheckbox.style.marginRight = '8px';
-    selectAllCheckbox.checked = initiallyAllSelected;
-    selectAllCheckbox.indeterminate = selectedItems.size > 0 && selectedItems.size < sortedDimensionValues.length;
-    selectAllCheckbox.style.flexShrink = '0';
-    selectAllCheckbox.style.accentColor = styles.checkboxColor;
-    
-    // Create a custom checkbox container for styling
-    const checkboxContainer = document.createElement('div');
-    checkboxContainer.style.display = 'flex';
-    checkboxContainer.style.alignItems = 'center';
-    checkboxContainer.style.marginRight = '8px';
-    checkboxContainer.style.flexShrink = '0';
-    
-    // Add the checkbox to its container
-    checkboxContainer.appendChild(selectAllCheckbox);
-    
     // Create the dimension name label for the header
     const headerDimensionLabel = document.createElement('div');
     headerDimensionLabel.className = 'dimension-name';
@@ -387,7 +367,6 @@ function drawViz(data) {
     }
     
     // Add elements to the header
-    headerSection.appendChild(checkboxContainer);
     headerSection.appendChild(headerDimensionLabel);
     
     // Create and add the reset link if enabled
@@ -405,11 +384,12 @@ function drawViz(data) {
       // Add click handler for reset
       resetLink.addEventListener('click', (e) => {
         e.preventDefault();
-        // Select all items (reset to default state)
-        selectedItems = new Set(sortedDimensionValues);
+        // Reset to default state (no items selected)
+        selectedItems.clear();
         updateCheckboxes();
         updateHeaderLabel();
         applyFilter();
+        refreshItemsList();
       });
       
       headerSection.appendChild(resetLink);
@@ -645,15 +625,15 @@ function drawViz(data) {
       }
     }
     
-    // Function to update the "Select All" checkbox state
+    // Function to update the "Select All" checkbox state - disabled for now
     function updateSelectAllCheckbox() {
       // Check if all items are selected
       const allSelected = selectedItems.size === sortedDimensionValues.length;
       // Check if some (but not all) items are selected
       const someSelected = selectedItems.size > 0 && selectedItems.size < sortedDimensionValues.length;
       
-      selectAllCheckbox.checked = allSelected;
-      selectAllCheckbox.indeterminate = someSelected;
+      // selectAllCheckbox.checked = allSelected;
+      // selectAllCheckbox.indeterminate = someSelected;
       updateHeaderLabel();
     }
     
@@ -666,23 +646,23 @@ function drawViz(data) {
       updateSelectAllCheckbox();
     }
     
-    // Add event listener for the "Select All" checkbox
-    selectAllCheckbox.addEventListener('change', () => {
-      if (selectAllCheckbox.checked) {
-        // Select all items
-        sortedDimensionValues.forEach(value => {
-          selectedItems.add(value);
-        });
-      } else {
-        // Deselect all items
-        selectedItems.clear();
-      }
-      updateCheckboxes();
-      applyFilter();
-      
-      // Refresh the list to update the order
-      refreshItemsList();
-    });
+    // Add event listener for the "Select All" checkbox - disabled for now
+    // selectAllCheckbox.addEventListener('change', () => {
+    //   if (selectAllCheckbox.checked) {
+    //     // Select all items
+    //     sortedDimensionValues.forEach(value => {
+    //       selectedItems.add(value);
+    //     });
+    //   } else {
+    //     // Deselect all items
+    //     selectedItems.clear();
+    //   }
+    //   updateCheckboxes();
+    //   applyFilter();
+    //   
+    //   // Refresh the list to update the order
+    //   refreshItemsList();
+    // });
     
     // Add event listener for the search input
     searchInput.addEventListener('input', () => {
@@ -704,9 +684,11 @@ function drawViz(data) {
     
     // Function to apply the filter based on selected items
     function applyFilter() {
-      if (selectedItems.size === 0 || selectedItems.size === sortedDimensionValues.length) {
-        // If nothing is selected or everything is selected, clear the filter
-    
+      if (selectedItems.size === 0) {
+        // If nothing is selected, clear the filter
+        dscc.clearInteraction('onClick');
+      } else if (selectedItems.size === sortedDimensionValues.length) {
+        // If everything is selected, also clear the filter
         dscc.clearInteraction('onClick');
       } else {
         // Apply filter with selected values
@@ -738,10 +720,10 @@ function drawViz(data) {
         
       
         dscc.sendInteraction('onClick', dscc.InteractionType.FILTER, filterPayload);
-        
-        // Update the header label with the correct count (number of checked items)
-        updateHeaderLabel();
       }
+      
+      // Update the header label with the correct count (number of checked items)
+      updateHeaderLabel();
     }
     
     // Function to refresh the items list with the current selection state
