@@ -64,6 +64,17 @@
           "id": "useCompactNumbers",
           "label": "Use Compact Number Format (10k, 5M)",
           "type": "CHECKBOX"
+        },
+        {
+          "id": "showNullValues",
+          "label": "Show Null Values",
+          "type": "CHECKBOX"
+        },
+        {
+          "id": "nullDisplayText",
+          "label": "Text to Display for Null Values",
+          "type": "TEXTINPUT",
+          "defaultValue": "(null)"
         }
       ]
     },

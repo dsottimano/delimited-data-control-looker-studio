@@ -34,6 +34,18 @@ function drawViz(data) {
       useCompactNumbers = data.style.useCompactNumbers.value;
     }
     
+    // Check if we should show null values
+    let showNullValues = true;
+    if (data.style && data.style.showNullValues && data.style.showNullValues.value !== undefined) {
+      showNullValues = data.style.showNullValues.value;
+    }
+    
+    // Get the text to display for null values
+    let nullDisplayText = "(null)";
+    if (data.style && data.style.nullDisplayText && data.style.nullDisplayText.value) {
+      nullDisplayText = data.style.nullDisplayText.value;
+    }
+    
     // Check if we should show selected count and reset link
     let showSelectedCount = true;
     let showResetLink = true;
@@ -63,16 +75,19 @@ function drawViz(data) {
         // Get the metric value - ensure it's a number
         const metricValue = row.metricID && row.metricID.length > 0 ? Number(row.metricID[0]) : 0;
         
-        // Skip null or undefined values
-        if (dimValue === null || dimValue === undefined) {
+        // Handle null, undefined, or empty values
+        const isNullish = dimValue === null || dimValue === undefined || dimValue === '';
+        
+        // Skip null values if showNullValues is false
+        if (!showNullValues && isNullish) {
           return;
         }
         
-        // Convert to string to ensure we can use string methods
-        const dimValueStr = String(dimValue);
+        // Handle null or undefined values with the configured display text
+        const dimValueStr = isNullish ? nullDisplayText : String(dimValue);
         
         // Check if this is a delimited field (contains the delimiter)
-        if (dimValueStr.includes(delimiter)) {
+        if (!isNullish && String(dimValue).includes(delimiter)) {
           // Split the delimited field and process each value
           const individualValues = dimValueStr.split(delimiter).map(v => v.trim());
           
@@ -122,12 +137,11 @@ function drawViz(data) {
     // Get unique individual values (non-delimited)
     const uniqueIndividualValues = new Set();
     dimensionMetrics.forEach((_, key) => {
-      // Skip null, undefined, or empty values
-      if (!key) return;
+      // Include null values (represented by nullDisplayText) if showNullValues is true
       
       // Convert to string to ensure we can use string methods
       const keyStr = String(key);
-      if (!keyStr.includes(delimiter)) {
+      if ((keyStr === nullDisplayText && showNullValues) || (!keyStr.includes(delimiter) && keyStr !== '')) {
         uniqueIndividualValues.add(keyStr);
       }
     });
@@ -155,13 +169,16 @@ function drawViz(data) {
           if (valueArray && valueArray.length > 0) {
             const value = valueArray[0];
             
-            // Skip null or undefined values
-            if (value === null || value === undefined) {
+            // Handle null, undefined, or empty values
+            const isNullish = value === null || value === undefined || value === '';
+            
+            // Skip null values if showNullValues is false
+            if (!showNullValues && isNullish) {
               return;
             }
             
-            // Convert to string to ensure we can use string methods
-            const valueStr = String(value);
+            // Handle null or undefined values with the configured display text
+            const valueStr = isNullish ? nullDisplayText : String(value);
             filterValues.add(valueStr);
           }
         });
@@ -178,10 +195,38 @@ function drawViz(data) {
         if (selectedItems.size === sortedDimensionValues.length) {
           initiallyAllSelected = true;
         }
-        
-   
       }
     }
+    
+    // Function to sort values with selected items at the top
+    function getSortedValues() {
+      // If all items are selected or none are selected, just use alphabetical order
+      if (selectedItems.size === 0 || selectedItems.size === sortedDimensionValues.length) {
+        return [...sortedDimensionValues];
+      }
+      
+      // Otherwise, put selected items at the top
+      const selected = [];
+      const unselected = [];
+      
+      sortedDimensionValues.forEach(value => {
+        if (selectedItems.has(value)) {
+          selected.push(value);
+        } else {
+          unselected.push(value);
+        }
+      });
+      
+      // Sort each group alphabetically
+      selected.sort();
+      unselected.sort();
+      
+      // Return combined array with selected items first
+      return [...selected, ...unselected];
+    }
+    
+    // Get the sorted values with selected items at the top
+    const displayValues = getSortedValues();
     
     // Extract style configuration with defaults
     const styles = {
@@ -442,7 +487,7 @@ function drawViz(data) {
       return value;
     }
     
-    sortedDimensionValues.forEach(value => {
+    displayValues.forEach(value => {
       const itemRow = document.createElement('div');
       itemRow.className = 'item';
       itemRow.style.display = 'flex';
@@ -502,25 +547,25 @@ function drawViz(data) {
       itemLabelContainer.appendChild(itemLabel);
       itemLabelContainer.appendChild(metricLabel);
 
-      // Create the "only" button
-      const onlyButton = document.createElement('span');
-      onlyButton.textContent = styles.onlyButtonText;
-      onlyButton.style.color = styles.accentColor;
-      onlyButton.style.fontSize = styles.onlyButtonFontSize;
-      onlyButton.style.cursor = 'pointer';
-      onlyButton.style.marginLeft = '8px';
-      onlyButton.style.opacity = '0'; // Hide by default
-      onlyButton.style.transition = 'opacity 0.2s';
-      onlyButton.style.flexShrink = '0';
+      // Disable the "only" button
+      // const onlyButton = document.createElement('span');
+      // onlyButton.textContent = styles.onlyButtonText;
+      // onlyButton.style.color = styles.accentColor;
+      // onlyButton.style.fontSize = styles.onlyButtonFontSize;
+      // onlyButton.style.cursor = 'pointer';
+      // onlyButton.style.marginLeft = '8px';
+      // onlyButton.style.opacity = '0'; // Hide by default
+      // onlyButton.style.transition = 'opacity 0.2s';
+      // onlyButton.style.flexShrink = '0';
       
-      // Show "only" on hover
-      itemRow.addEventListener('mouseover', () => {
-        onlyButton.style.opacity = '1';
-      });
+      // // Show "only" on hover
+      // itemRow.addEventListener('mouseover', () => {
+      //   onlyButton.style.opacity = '1';
+      // });
       
-      itemRow.addEventListener('mouseout', () => {
-        onlyButton.style.opacity = '0';
-      });
+      // itemRow.addEventListener('mouseout', () => {
+      //   onlyButton.style.opacity = '0';
+      // });
       
       // Add click handlers
       itemCheckbox.addEventListener('change', (e) => {
@@ -532,12 +577,15 @@ function drawViz(data) {
         }
         updateSelectAllCheckbox();
         applyFilter();
+        
+        // Refresh the list to move selected items to the top
+        refreshItemsList();
       });
       
       // Make the entire row clickable to toggle the checkbox
       itemRow.addEventListener('click', (e) => {
-        // Only toggle if we didn't click on the checkbox or "only" button
-        if (e.target !== itemCheckbox && e.target !== onlyButton) {
+        // Only toggle if we didn't click on the checkbox
+        if (e.target !== itemCheckbox) {
           // Toggle only this checkbox
           itemCheckbox.checked = !itemCheckbox.checked;
           if (itemCheckbox.checked) {
@@ -548,23 +596,26 @@ function drawViz(data) {
           updateSelectAllCheckbox();
           applyFilter();
           
+          // Refresh the list to move selected items to the top
+          refreshItemsList();
+          
           // Prevent event bubbling to avoid multiple selections
           e.stopPropagation();
         }
       });
       
-      onlyButton.addEventListener('click', (e) => {
-        e.stopPropagation(); // Prevent triggering the row click
-        selectedItems.clear();
-        selectedItems.add(value);
-        updateCheckboxes();
-        applyFilter();
-      });
+      // onlyButton.addEventListener('click', (e) => {
+      //   e.stopPropagation(); // Prevent triggering the row click
+      //   selectedItems.clear();
+      //   selectedItems.add(value);
+      //   updateCheckboxes();
+      //   applyFilter();
+      // });
       
       // Add elements to the item row
       itemRow.appendChild(itemCheckbox);
       itemRow.appendChild(itemLabelContainer);
-      itemRow.appendChild(onlyButton);
+      // itemRow.appendChild(onlyButton);
       
       // Add the item row to the list
       itemsList.appendChild(itemRow);
@@ -628,6 +679,9 @@ function drawViz(data) {
       }
       updateCheckboxes();
       applyFilter();
+      
+      // Refresh the list to update the order
+      refreshItemsList();
     });
     
     // Add event listener for the search input
@@ -636,7 +690,10 @@ function drawViz(data) {
       const items = itemsList.querySelectorAll('.item');
       
       items.forEach((item, index) => {
-        const value = sortedDimensionValues[index];
+        // Get the value from the item's label text
+        const itemLabel = item.querySelector('span');
+        const value = itemLabel ? itemLabel.textContent : '';
+        
         if (value.toLowerCase().includes(searchTerm)) {
           item.style.display = 'flex';
         } else {
@@ -661,10 +718,12 @@ function drawViz(data) {
         
         // Add all selected individual values
         selectedItems.forEach(value => {
-          filterValues.add(value);
+          // Convert nullDisplayText back to actual null for the filter
+          const actualValue = value === nullDisplayText ? null : value;
+          filterValues.add(actualValue);
           
           // Also add any delimited fields containing this value
-          if (delimitedValues.has(value)) {
+          if (value !== nullDisplayText && delimitedValues.has(value)) {
             delimitedValues.get(value).forEach(delimitedField => {
               filterValues.add(delimitedField);
             });
@@ -683,6 +742,123 @@ function drawViz(data) {
         // Update the header label with the correct count (number of checked items)
         updateHeaderLabel();
       }
+    }
+    
+    // Function to refresh the items list with the current selection state
+    function refreshItemsList() {
+      // Clear the current list
+      while (itemsList.firstChild) {
+        itemsList.removeChild(itemsList.firstChild);
+      }
+      
+      // Get the updated sorted values
+      const updatedDisplayValues = getSortedValues();
+      
+      // Recreate the list with the new order
+      updatedDisplayValues.forEach(value => {
+        const itemRow = document.createElement('div');
+        itemRow.className = 'item';
+        itemRow.style.display = 'flex';
+        itemRow.style.alignItems = 'center';
+        itemRow.style.padding = '8px 16px';
+        itemRow.style.borderBottom = `1px solid ${styles.itemBorderColor}`;
+        itemRow.style.cursor = 'pointer';
+        itemRow.style.boxSizing = 'border-box';
+        itemRow.style.backgroundColor = styles.itemBackgroundColor;
+        
+        // Add hover effect
+        itemRow.addEventListener('mouseover', () => {
+          itemRow.style.backgroundColor = styles.itemHoverColor;
+        });
+        
+        itemRow.addEventListener('mouseout', () => {
+          itemRow.style.backgroundColor = styles.itemBackgroundColor;
+        });
+        
+        // Create the checkbox for this item
+        const itemCheckbox = document.createElement('input');
+        itemCheckbox.type = 'checkbox';
+        itemCheckbox.checked = selectedItems.has(value);
+        itemCheckbox.style.marginRight = '8px';
+        itemCheckbox.style.flexShrink = '0';
+        itemCheckbox.style.accentColor = styles.checkboxColor;
+        
+        // Create the item label container for flexible layout
+        const itemLabelContainer = document.createElement('div');
+        itemLabelContainer.style.flex = '1';
+        itemLabelContainer.style.display = 'flex';
+        itemLabelContainer.style.alignItems = 'center';
+        itemLabelContainer.style.justifyContent = 'space-between';
+        itemLabelContainer.style.marginRight = '8px';
+        itemLabelContainer.style.overflow = 'hidden';
+
+        // Create the item label
+        const itemLabel = document.createElement('span');
+        itemLabel.textContent = value;
+        itemLabel.style.fontSize = styles.fontSize;
+        itemLabel.style.color = styles.itemTextColor;
+        itemLabel.style.whiteSpace = 'nowrap';
+        itemLabel.style.overflow = 'hidden';
+        itemLabel.style.textOverflow = 'ellipsis';
+        itemLabel.style.marginRight = '8px';
+
+        // Create the metric label with the count for this value
+        const metricLabel = document.createElement('span');
+        const count = individualValueCounts.get(value) || 0;
+        metricLabel.textContent = formatMetricValue(count);
+        metricLabel.style.fontSize = styles.fontSize;
+        metricLabel.style.color = '#70757a'; // Metric color in gray
+        metricLabel.style.whiteSpace = 'nowrap';
+        metricLabel.style.flexShrink = '0';
+
+        // Add labels to the container
+        itemLabelContainer.appendChild(itemLabel);
+        itemLabelContainer.appendChild(metricLabel);
+        
+        // Add click handlers
+        itemCheckbox.addEventListener('change', (e) => {
+          e.stopPropagation();
+          if (itemCheckbox.checked) {
+            selectedItems.add(value);
+          } else {
+            selectedItems.delete(value);
+          }
+          updateSelectAllCheckbox();
+          applyFilter();
+          
+          // Refresh the list to move selected items to the top
+          refreshItemsList();
+        });
+        
+        // Make the entire row clickable to toggle the checkbox
+        itemRow.addEventListener('click', (e) => {
+          // Only toggle if we didn't click on the checkbox
+          if (e.target !== itemCheckbox) {
+            // Toggle only this checkbox
+            itemCheckbox.checked = !itemCheckbox.checked;
+            if (itemCheckbox.checked) {
+              selectedItems.add(value);
+            } else {
+              selectedItems.delete(value);
+            }
+            updateSelectAllCheckbox();
+            applyFilter();
+            
+            // Refresh the list to move selected items to the top
+            refreshItemsList();
+            
+            // Prevent event bubbling to avoid multiple selections
+            e.stopPropagation();
+          }
+        });
+        
+        // Add elements to the item row
+        itemRow.appendChild(itemCheckbox);
+        itemRow.appendChild(itemLabelContainer);
+        
+        // Add the item row to the list
+        itemsList.appendChild(itemRow);
+      });
     }
     
     // Handle window resize events
